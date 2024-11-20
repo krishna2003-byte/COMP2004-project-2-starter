@@ -1,14 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CartContainer from "./CartContainer";
 import ProductsContainer from "./ProductsContainer";
 import NavBar from "./NavBar";
+import axios from "axios";
 
 export default function GroceriesAppContainer({ products }) {
+  //////////States///////////
   const [productQuantity, setProductQuantity] = useState(
     products.map((product) => ({ id: product.id, quantity: 0 }))
   );
 
   const [cartList, setCartList] = useState([]);
+  const [productList, setProductList] = useState([]);
+
+  /////////useEffect/////////
+
+  useEffect(() => {
+    handleProductsFromDB();
+  }, []);
+
+  /////Handlers///////////
+
+  const handleProductsFromDB = async () => {
+    try {
+      await axios
+        .get("http://localhost:3000/products")
+        .then((result) => setProductList(result.data));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   const handleAddQuantity = (productId, mode) => {
     if (mode === "cart") {
@@ -81,13 +102,13 @@ export default function GroceriesAppContainer({ products }) {
   const handleClearCart = () => {
     setCartList([]);
   };
-
+  /////////Renderer////////
   return (
     <div>
       <NavBar quantity={cartList.length} />
       <div className="GroceriesApp-Container">
         <ProductsContainer
-          products={products}
+          products={productList}
           handleAddQuantity={handleAddQuantity}
           handleRemoveQuantity={handleRemoveQuantity}
           handleAddToCart={handleAddToCart}
